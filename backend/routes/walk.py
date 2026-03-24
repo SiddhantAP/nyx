@@ -1,4 +1,6 @@
 import json
+import asyncio
+from services.escalation import run_escalation
 import uuid
 import os
 from datetime import datetime, timezone
@@ -65,6 +67,8 @@ async def start_walk(body: WalkStartRequest):
         "timestamp": datetime.now(timezone.utc).isoformat(),
     })
     await redis.set(f"walk:{session_id_str}:location", location_data, ex=ttl)
+
+    asyncio.create_task(run_escalation(session_id_str, eta["eta_minutes"]))
 
     return {
         "session_id": session_id_str,
