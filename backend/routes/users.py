@@ -58,8 +58,3 @@ async def setup_user(body: UserSetupRequest):
                 print(f"SMS failed for {contact.phone}: {e}")
 
     return {"user_id": str(user_id)}
-```
-
-Also make sure your Railway `nyx` service has this variable set:
-```
-BASE_URL = https://nyx-production-7384.up.railway.app
