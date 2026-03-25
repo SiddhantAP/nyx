@@ -9,29 +9,11 @@ async def contact_websocket(websocket: WebSocket, session_id: str, map_token: st
     pool = get_pool()
 
     token_session = await redis.get(f"maptoken:{map_token}")
-    print(f"DEBUG: map_token={map_token} token_session={token_session} session_id={session_id}")
-    
     if token_session != session_id:
-        print(f"DEBUG: token mismatch, closing 4001")
         await websocket.close(code=4001)
         return
 
     async with pool.acquire() as conn:
-        # Check session exists
-        session = await conn.fetchrow(
-            "SELECT id, user_id FROM walk_sessions WHERE id = $1::uuid",
-            session_id,
-        )
-        print(f"DEBUG: session={session}")
-
-        # Check contacts for this user
-        if session:
-            contacts = await conn.fetch(
-                "SELECT id, consent_accepted, tracking_active FROM contacts WHERE user_id = $1",
-                session["user_id"],
-            )
-            print(f"DEBUG: contacts={[dict(c) for c in contacts]}")
-
         contact = await conn.fetchrow(
             """
             SELECT c.id, c.consent_accepted, c.tracking_active
@@ -45,10 +27,8 @@ async def contact_websocket(websocket: WebSocket, session_id: str, map_token: st
             """,
             session_id,
         )
-        print(f"DEBUG: contact={contact}")
 
     if not contact:
-        print(f"DEBUG: no contact found, closing 4003")
         await websocket.close(code=4003)
         return
 

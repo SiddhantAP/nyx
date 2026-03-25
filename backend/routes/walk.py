@@ -208,8 +208,3 @@ async def get_map_token(session_id: str):
 
     return {"token": token}
 
-@router.get("/debug/clear-revoke/{contact_id}")
-async def clear_revoke(contact_id: str):
-    redis = get_redis()
-    await redis.delete(f"revoked:{contact_id}")
-    return {"cleared": contact_id}
