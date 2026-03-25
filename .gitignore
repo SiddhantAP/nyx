@@ -1,3 +1,11 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+backend/.env
+
 # Logs
 logs
 *.log

@@ -1,21 +1,28 @@
+import math
+
+
 async def is_within_home(conn, session_id: str, current_lat: float, current_lng: float) -> bool:
     row = await conn.fetchrow(
         """
-        SELECT ST_DWithin(
-            ST_MakePoint($1, $2)::geography,
-            ST_MakePoint(u.home_lng, u.home_lat)::geography,
-            100
-        ) AS arrived
+        SELECT u.home_lat, u.home_lng
         FROM walk_sessions ws
         JOIN users u ON u.id = ws.user_id
-        WHERE ws.id = $3
+        WHERE ws.id = $1
         """,
-        current_lng, current_lat, session_id,
+        session_id,
     )
 
     if not row:
         return False
 
-    return row["arrived"]
+    # Haversine distance in metres
+    lat1, lng1 = math.radians(current_lat), math.radians(current_lng)
+    lat2, lng2 = math.radians(row["home_lat"]), math.radians(row["home_lng"])
 
-ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImUyMDU0MmEzMzRjODQ0YmE4NjJjMDc1OTg3MDQ1ZmVmIiwiaCI6Im11cm11cjY0In0="
+    dlat = lat2 - lat1
+    dlng = lng2 - lng1
+
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlng / 2) ** 2
+    distance_metres = 6371000 * 2 * math.asin(math.sqrt(a))
+
+    return distance_metres <= 100
