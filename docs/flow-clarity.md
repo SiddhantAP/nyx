@@ -101,7 +101,7 @@ Allow / Block
 │   One last thing.                   │
 │                                     │
 │   To notify you if Priya needs      │
-│   help, we need permission to        │
+│   help, we need permission to       │
 │   send you notifications.           │
 │                                     │
 │   ┌─────────────────────────────┐   │
